@@ -16,22 +16,22 @@ model Usuario {
   email      String   @unique
   contrasena String
   rol        String
-  Artista    Artista? @relation(fields: [artistaId], references: [id])
-  Cliente    Cliente? @relation(fields: [clienteId], references: [id])
-  artistaId  Int?     @unique
-  clienteId  Int?     @unique
+  artista    Artista? @relation("UsuarioArtista")
+  cliente    Cliente? @relation("UsuarioCliente")
 }
 
 model Artista {
   id             Int              @id @default(autoincrement())
   estampas       Estampa[]
   filtroEstampas FiltroEstampas[]
-  usuario        Usuario?         @relation
+  usuarioId      Int              @unique
+  usuario        Usuario          @relation("UsuarioArtista", fields: [usuarioId], references: [id])
 }
 
 model Cliente {
   id             Int           @id @default(autoincrement())
-  usuario        Usuario?      @relation
+  usuarioId      Int           @unique
+  usuario        Usuario       @relation("UsuarioCliente", fields: [usuarioId], references: [id])
   carrito        Camiseta[]
   compras        Compra[]
   estadisticas   Estadisticas? @relation("ClienteEstadisticas", fields: [estadisticasId], references: [id])
@@ -42,16 +42,23 @@ model Estampa {
   id                  Int                @id @default(autoincrement())
   nombre              String
   descripcion         String
-  imagenes            String
+  imagenes            Imagen[]
   tema                String
   popularidad         Int
   rating              Float
-  autorId             Int
-  autor               Artista            @relation(fields: [autorId], references: [id])
+  artista             Artista?           @relation(fields: [artistaId], references: [id])
+  artistaId           Int?
   disponibleParaVenta Boolean
   camisetas           Camiseta[]
   estampasMasVendidas Estadisticas[]     @relation("EstampasVendidas")
   estampasCatalogo    CatalogoEstampas[] @relation("EstampasCatalogo")
+}
+
+model Imagen {
+  id        Int     @id @default(autoincrement())
+  url       String
+  estampa   Estampa @relation(fields: [estampaId], references: [id])
+  estampaId Int
 }
 
 model Camiseta {

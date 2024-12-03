@@ -41,12 +41,16 @@ export async function POST(request: Request) {
     }
 
     const hashedPassword = await bcrypt.hash(data.contrasena, 10);
+
     const newUser = await db.usuario.create({
       data: {
         nombre: data.nombre,
         email: data.email,
         contrasena: hashedPassword,
         rol: data.rol,
+        ...(data.rol === "ARTISTA"
+          ? { artista: { create: {} } }
+          : { cliente: { create: {} } }),
       },
     });
 

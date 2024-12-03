@@ -1,9 +1,15 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
+import { JWT } from "next-auth/jwt";
+import { Session } from "next-auth";
 import CredentialProvider from "next-auth/providers/credentials";
 import db from "@/libs/prisma";
 import bcrypt from "bcrypt";
+import dotenv from "dotenv";
 
-const authOptions = {
+dotenv.config();
+
+export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     CredentialProvider({
       name: "Credentials",
@@ -12,15 +18,17 @@ const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials, req) {
-        console.log(credentials);
         const userFound = await db.usuario.findUnique({
           where: {
             email: credentials?.email,
           },
+          include: {
+            // Incluir relaciones para obtener el artista si es necesario
+            artista: true,
+          },
         });
-        if (!userFound) throw new Error("Usuario no encontrado");
 
-        console.log(userFound);
+        if (!userFound) throw new Error("Usuario no encontrado");
 
         const matchPassword = await bcrypt.compare(
           credentials?.password ?? "",
@@ -33,10 +41,40 @@ const authOptions = {
           id: userFound.id.toString(),
           name: userFound.nombre,
           email: userFound.email,
+          role: userFound.rol,
+          artistaId: userFound.artista?.id || null,
         };
       },
     }),
   ],
+  callbacks: {
+    async session({
+      session,
+      token,
+    }: {
+      session: Session;
+      token: JWT & { role?: string; artistaId?: number | null };
+    }) {
+      if (session.user) {
+        session.user.role = token.role;
+        session.user.artistaId = token.artistaId ?? null;
+      }
+      return session;
+    },
+    async jwt({
+      token,
+      user,
+    }: {
+      token: JWT & { role?: string; artistaId?: number | null };
+      user?: { role?: string; artistaId?: number | null };
+    }) {
+      if (user) {
+        token.role = user.role;
+        token.artistaId = user.artistaId ?? null; // Añade el artistaId al token
+      }
+      return token;
+    },
+  },
 };
 
 const handler = NextAuth(authOptions);
