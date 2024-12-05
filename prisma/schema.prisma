@@ -74,6 +74,8 @@ model Camiseta {
   camisetasCatalogo CatalogoCamisetas[] @relation("CamisetasCatalogo")
   cliente           Cliente?            @relation(fields: [clienteId], references: [id])
   clienteId         Int?
+  posicionEstampaX  Float?
+  posicionEstampaY  Float?
 }
 
 model Compra {

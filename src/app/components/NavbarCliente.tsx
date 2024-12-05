@@ -6,11 +6,11 @@ import {
   FaSignOutAlt,
   FaUserCircle,
   FaListAlt,
-  FaFileUpload,
+  FaShoppingCart,
 } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 
-const Navbar = () => {
+const NavbarCliente = () => {
   const { data: session } = useSession();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -20,23 +20,21 @@ const Navbar = () => {
 
   return (
     <div>
-      <nav className="fixed top-0 left-0 h-screen w-60 bg-blue-700 text-white flex flex-col">
+      <nav className="fixed top-0 left-0 h-screen w-60 bg-blue-700 text-white flex flex-col z-10">
         <div className="py-6 px-5">
-          <h1 className="text-2xl font-bold tracking-wide">
-            Panel del Artista
-          </h1>
+          <h1 className="text-2xl font-bold tracking-wide">Coleccionista</h1>
         </div>
         <ul className="flex-1 space-y-1">
           <li className="py-3 px-5 hover:bg-blue-800 cursor-pointer flex items-center space-x-5">
-            <FaFileUpload />
-            <Link href="/pages/subirEstampa" className="text-sm">
-              Subir Estampa
+            <FaListAlt />
+            <Link href="/pages/catalogoEstampas" className="text-sm">
+              Catálogo de Estampas
             </Link>
           </li>
           <li className="py-3 px-5 hover:bg-blue-800 cursor-pointer flex items-center space-x-5">
-            <FaListAlt />
-            <Link href="/pages/misEstampas" className="text-sm">
-              Mis Estampas
+            <FaShoppingCart />
+            <Link href="/pages/carrito" className="text-sm">
+              Carrito de Compras
             </Link>
           </li>
         </ul>
@@ -99,4 +97,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default NavbarCliente;

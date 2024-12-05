@@ -36,11 +36,12 @@ export async function POST(req: Request) {
     await ensureUploadDir();
 
     // Guardar la imagen en el servidor
-    const filePath = path.join(uploadDir, file.name);
+    const fileName = `${Date.now()}_${file.name}`;
+    const filePath = path.join(uploadDir, fileName);
     const fileBuffer = await file.arrayBuffer();
     await fs.writeFile(filePath, Buffer.from(fileBuffer));
 
-    const imageUrl = `/uploads/${file.name}`;
+    const imageUrl = `/uploads/${fileName}`;
 
     // Guardar la estampa en la base de datos
     const newEstampa = await prisma.estampa.create({
@@ -68,34 +69,112 @@ export async function POST(req: Request) {
   }
 }
 
-// Obtener todas las estampas
+// Obtener las estampas
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
     const artistaId = url.searchParams.get("artistaId");
+    const tema = url.searchParams.get("tema");
+    const rol = url.searchParams.get("rol");
+    const busqueda = url.searchParams.get("busqueda");
 
-    if (!artistaId) {
-      return NextResponse.json(
-        { message: "El ID del artista es requerido" },
-        { status: 400 }
-      );
+    let estampas;
+
+    if (busqueda) {
+      // Búsqueda general por nombre, tema o artista
+      estampas = await prisma.estampa.findMany({
+        where: {
+          OR: [
+            { nombre: { contains: busqueda } },
+            { tema: { contains: busqueda } },
+            {
+              artista: {
+                usuario: {
+                  nombre: { contains: busqueda },
+                },
+              },
+            },
+          ],
+          disponibleParaVenta: true,
+        },
+        include: {
+          imagenes: true,
+          artista: {
+            include: {
+              usuario: true,
+            },
+          },
+        },
+      });
+    } else if (artistaId) {
+      // Filtrar por artista específico
+      if (rol === "ARTISTA") {
+        estampas = await prisma.estampa.findMany({
+          where: {
+            artistaId: parseInt(artistaId, 10),
+          },
+          include: {
+            imagenes: true,
+            artista: {
+              include: {
+                usuario: true,
+              },
+            },
+          },
+        });
+      } else {
+        estampas = await prisma.estampa.findMany({
+          where: {
+            artistaId: parseInt(artistaId, 10),
+            disponibleParaVenta: true,
+          },
+          include: {
+            imagenes: true,
+            artista: {
+              include: {
+                usuario: true,
+              },
+            },
+          },
+        });
+      }
+    } else if (tema) {
+      estampas = await prisma.estampa.findMany({
+        where: {
+          tema: tema,
+          disponibleParaVenta: true,
+        },
+        include: {
+          imagenes: true,
+          artista: {
+            include: {
+              usuario: true,
+            },
+          },
+        },
+      });
+    } else {
+      estampas = await prisma.estampa.findMany({
+        where: {
+          disponibleParaVenta: true,
+        },
+        include: {
+          imagenes: true,
+          artista: {
+            include: {
+              usuario: true,
+            },
+          },
+        },
+      });
     }
-
-    // Buscar estampas solo del artista especificado
-    const estampas = await prisma.estampa.findMany({
-      where: {
-        artistaId: parseInt(artistaId, 10),
-      },
-      include: {
-        imagenes: true,
-      },
-    });
 
     // Mapear la disponibilidad y las imágenes
     const estampasDetalles = estampas.map((estampa) => ({
       ...estampa,
       disponible: estampa.disponibleParaVenta,
       imagen: estampa.imagenes?.[0]?.url,
+      artistaNombre: estampa.artista?.usuario.nombre,
     }));
 
     return NextResponse.json(estampasDetalles, { status: 200 });

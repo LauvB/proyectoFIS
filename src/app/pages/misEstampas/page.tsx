@@ -13,7 +13,7 @@ const MisEstampas = () => {
   // Cargar estampas al iniciar
   useEffect(() => {
     if (session?.user?.artistaId) {
-      fetch(`/api/estampas?artistaId=${session.user.artistaId}`)
+      fetch(`/api/estampas?artistaId=${session.user.artistaId}&rol=ARTISTA`)
         .then((res) => res.json())
         .then(setEstampas)
         .catch((err) => console.error("Error al cargar estampas:", err));
