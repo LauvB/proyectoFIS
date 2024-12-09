@@ -4,6 +4,7 @@ import { useForm, FieldError } from "react-hook-form";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Link from "next/link";
 
 function LoginPage() {
   const {
@@ -83,6 +84,12 @@ function LoginPage() {
         <button className="w-full bg-blue-500 text-white p-3 rounded-lg mt-2">
           Iniciar sesión
         </button>
+        <p className="text-slate-400 mt-10 text-center">
+          ¿No tienes una cuenta?{" "}
+          <Link href="/auth/register" className="underline">
+            Regístrate ahora
+          </Link>
+        </p>
       </form>
     </div>
   );
