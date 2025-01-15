@@ -7,12 +7,14 @@ declare module "next-auth" {
     user: {
       role?: string;
       artistaId?: number | null;
+      clienteId?: number | null;
     } & DefaultSession["user"];
   }
 
   interface User extends DefaultUser {
     role?: string;
     artistaId?: number | null;
+    clienteId?: number | null;
   }
 }
 
@@ -21,5 +23,6 @@ declare module "next-auth/jwt" {
   interface JWT {
     role?: string;
     artistaId?: number | null;
+    clienteId?: number | null;
   }
 }

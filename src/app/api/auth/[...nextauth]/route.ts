@@ -23,8 +23,8 @@ export const authOptions: NextAuthOptions = {
             email: credentials?.email,
           },
           include: {
-            // Incluir relaciones para obtener el artista si es necesario
             artista: true,
+            cliente: true,
           },
         });
 
@@ -43,6 +43,7 @@ export const authOptions: NextAuthOptions = {
           email: userFound.email,
           role: userFound.rol,
           artistaId: userFound.artista?.id || null,
+          clienteId: userFound.cliente?.id || null,
         };
       },
     }),
@@ -53,11 +54,16 @@ export const authOptions: NextAuthOptions = {
       token,
     }: {
       session: Session;
-      token: JWT & { role?: string; artistaId?: number | null };
+      token: JWT & {
+        role?: string;
+        artistaId?: number | null;
+        clienteId?: number | null;
+      };
     }) {
       if (session.user) {
         session.user.role = token.role;
         session.user.artistaId = token.artistaId ?? null;
+        session.user.clienteId = token.clienteId ?? null;
       }
       return session;
     },
@@ -65,12 +71,21 @@ export const authOptions: NextAuthOptions = {
       token,
       user,
     }: {
-      token: JWT & { role?: string; artistaId?: number | null };
-      user?: { role?: string; artistaId?: number | null };
+      token: JWT & {
+        role?: string;
+        artistaId?: number | null;
+        clienteId?: number | null;
+      };
+      user?: {
+        role?: string;
+        artistaId?: number | null;
+        clienteId?: number | null;
+      };
     }) {
       if (user) {
         token.role = user.role;
-        token.artistaId = user.artistaId ?? null; // Añade el artistaId al token
+        token.artistaId = user.artistaId ?? null;
+        token.clienteId = user.clienteId ?? null;
       }
       return token;
     },

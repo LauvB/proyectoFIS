@@ -2,8 +2,18 @@
 
 import { useForm, FieldError } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { MdOutlineEmail } from "react-icons/md";
+import { IoLockClosedOutline } from "react-icons/io5";
+import { FaRegUser } from "react-icons/fa";
+import { IoIosArrowDropdown } from "react-icons/io";
+import "react-toastify/dist/ReactToastify.css";
 
-function Registro() {
+function Registro({
+  onRegistrationComplete,
+}: {
+  onRegistrationComplete: () => void;
+}) {
   const {
     register,
     handleSubmit,
@@ -14,7 +24,7 @@ function Registro() {
 
   const onSubmit = handleSubmit(async (data) => {
     if (data.password != data.confirmPassword) {
-      return alert("Las contraseñas no coinciden");
+      return toast.error("Las contraseñas no coinciden");
     }
 
     const res = await fetch("/api/auth/register", {
@@ -32,7 +42,8 @@ function Registro() {
     const resJSON = await res.json();
 
     if (res.ok) {
-      router.push("/auth/login");
+      toast.success("Usuario registrado correctamente");
+      onRegistrationComplete();
     }
 
     console.log(res);
@@ -41,98 +52,141 @@ function Registro() {
   console.log(errors);
 
   return (
-    <div className="h-[calc(100vh-7rem)] flex justify-center items-center">
-      <form onSubmit={onSubmit} className="w-1/4">
-        <h1 className="text-slate-200 font-bold text-4xl mb-4">Registro</h1>
-        <label htmlFor="username" className="text-slate-500 mb-2 block text-sm">
-          Nombre de Usuario:
-        </label>
-        <input
-          type="text"
-          {...register("username", {
-            required: {
-              value: true,
-              message: "El nombre de usuario es obligatorio",
-            },
-          })}
-          className="p-3 rounded block mb-2 bg-slate-900 text-slate-300 w-full"
-        />
-        {errors.username && (
-          <span className="text-red-500 text-xs">
-            {(errors.username as FieldError).message || "Error desconocido"}
-          </span>
-        )}
-        <label htmlFor="email" className="text-slate-500 mb-2 block text-sm">
-          E-mail:
-        </label>
-        <input
-          type="email"
-          {...register("email", {
-            required: {
-              value: true,
-              message: "El email es obligatorio",
-            },
-          })}
-          className="p-3 rounded block mb-2 bg-slate-900 text-slate-300 w-full"
-        />
-        {errors.email && (
-          <span className="text-red-500 text-xs">
-            {(errors.email as FieldError).message || "Error desconocido"}
-          </span>
-        )}
-        <label htmlFor="password" className="text-slate-500 mb-2 block text-sm">
-          Contraseña:
-        </label>
-        <input
-          type="password"
-          {...register("password", {
-            required: {
-              value: true,
-              message: "Escribe una contraseña",
-            },
-          })}
-          className="p-3 rounded block mb-2 bg-slate-900 text-slate-300 w-full"
-        />
-        {errors.password && (
-          <span className="text-red-500 text-xs">
-            {(errors.password as FieldError).message || "Error desconocido"}
-          </span>
-        )}
-        <label
-          htmlFor="confirmPassword"
-          className="text-slate-500 mb-2 block text-sm"
-        >
-          Confirmar Contraseña:
-        </label>
-        <input
-          type="password"
-          {...register("confirmPassword", {
-            required: { value: true, message: "Cofirme la contraseña" },
-          })}
-          className="p-3 rounded block mb-2 bg-slate-900 text-slate-300 w-full"
-        />
-        {errors.confirmPassword && (
-          <span className="text-red-500 text-xs">
-            {(errors.confirmPassword as FieldError).message ||
-              "Error desconocido"}
-          </span>
-        )}
+    <div className="relative h-screen flex justify-center items-center w-full">
+      <div className="relative w-3/5 p-10">
+        <form onSubmit={onSubmit}>
+          {/* Título */}
+          <h1 className="font-bold text-3xl text-center mb-6">Registro</h1>
 
-        <label htmlFor="rol" className="text-slate-500 mb-2 block text-sm">
-          Rol:
-        </label>
-        <select
-          {...register("rol", { required: true })}
-          className="p-3 rounded block mb-2 bg-slate-900 text-slate-300 w-full"
-        >
-          <option value="CLIENTE">Cliente</option>
-          <option value="ARTISTA">Artista</option>
-        </select>
+          {/* Grid para dividir el formulario en dos columnas */}
+          <div className="grid grid-cols-2 gap-6">
+            {/* Columna 1 */}
+            <div>
+              {/* Nombre de Usuario */}
+              <div className="relative flex items-center text-slate-900">
+                <span className="absolute left-4 text-lg">
+                  <FaRegUser />
+                </span>
+                <input
+                  type="text"
+                  placeholder="Nombre de usuario"
+                  {...register("username", {
+                    required: {
+                      value: true,
+                      message: "El nombre de usuario es obligatorio",
+                    },
+                  })}
+                  className="pl-12 pr-5 w-full h-12 border-none outline-none rounded-3xl bg-white bg-opacity-80 placeholder-slate-900"
+                />
+              </div>
+              {errors.username && (
+                <span className="text-red-500 text-sm">
+                  {(errors.username as FieldError).message ||
+                    "Error desconocido"}
+                </span>
+              )}
 
-        <button className="w-full bg-blue-500 text-white p-3 rounded-lg mt-2">
-          Registrarse
-        </button>
-      </form>
+              {/* Correo */}
+              <div className="relative flex items-center text-slate-900 mt-6">
+                <span className="absolute left-4 text-xl">
+                  <MdOutlineEmail />
+                </span>
+                <input
+                  type="email"
+                  placeholder="E-mail"
+                  {...register("email", {
+                    required: {
+                      value: true,
+                      message: "El email es obligatorio",
+                    },
+                  })}
+                  className="pl-12 pr-5 w-full h-12 border-none outline-none rounded-3xl bg-white bg-opacity-80 placeholder-slate-900"
+                />
+              </div>
+              {errors.email && (
+                <span className="text-red-500 text-sm">
+                  {(errors.email as FieldError).message || "Error desconocido"}
+                </span>
+              )}
+
+              {/* Rol */}
+              <div className="relative flex items-center text-slate-900 mt-6">
+                <span className="absolute left-4 text-xl">
+                  <IoIosArrowDropdown />
+                </span>
+                <select
+                  {...register("rol", { required: true })}
+                  className="pl-12 w-full h-12 border-none outline-none rounded-3xl bg-white bg-opacity-80 appearance-none"
+                >
+                  <option value="CLIENTE">Cliente</option>
+                  <option value="ARTISTA">Artista</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Columna 2 */}
+            <div>
+              {/* Contraseña */}
+              <div className="relative flex items-center text-slate-900">
+                <span className="absolute left-4 text-xl">
+                  <IoLockClosedOutline />
+                </span>
+                <input
+                  type="password"
+                  placeholder="Contraseña"
+                  {...register("password", {
+                    required: {
+                      value: true,
+                      message: "Escribe una contraseña",
+                    },
+                    pattern: {
+                      value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/,
+                      message:
+                        "La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una minúscula, un número y un carácter especial",
+                    },
+                  })}
+                  className="pl-12 pr-5 w-full h-12 border-none outline-none rounded-3xl bg-white bg-opacity-80 placeholder-slate-900"
+                />
+              </div>
+              {errors.password && (
+                <span className="text-red-500 text-sm">
+                  {(errors.password as FieldError).message ||
+                    "Error desconocido"}
+                </span>
+              )}
+
+              {/* Confirmar Contraseña */}
+              <div className="relative flex items-center text-slate-900 mt-6">
+                <span className="absolute left-4 text-xl">
+                  <IoLockClosedOutline />
+                </span>
+                <input
+                  type="password"
+                  placeholder="Confirmar contraseña"
+                  {...register("confirmPassword", {
+                    required: {
+                      value: true,
+                      message: "Confirme la contraseña",
+                    },
+                  })}
+                  className="pl-12 pr-5 w-full h-12 border-none outline-none rounded-3xl bg-white bg-opacity-80 placeholder-slate-900"
+                />
+              </div>
+              {errors.confirmPassword && (
+                <span className="text-red-500 text-sm">
+                  {(errors.confirmPassword as FieldError).message ||
+                    "Error desconocido"}
+                </span>
+              )}
+
+              {/* Botón de Registrarse */}
+              <button className="w-full bg-blue-500 text-white p-3 rounded-3xl hover:bg-blue-600 mt-6">
+                Registrarse
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

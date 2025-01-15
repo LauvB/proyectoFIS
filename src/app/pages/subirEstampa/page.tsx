@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import SessionWrapper from "../sessionWrapper/page";
 import Navbar from "@/app/components/Navbar";
 import Loading from "@/app/components/Loading";
+import { FaCheck } from "react-icons/fa";
 
 const SubirEstampa = () => {
   const { data: session } = useSession();
@@ -122,7 +123,7 @@ const SubirEstampa = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center">
       <Navbar />
       <div className="ml-60 max-w-4xl">
         {/* Contenido del dashboard */}
@@ -232,30 +233,30 @@ const SubirEstampa = () => {
               </div>
 
               <div>
-                <label className="flex items-center space-x-2 py-2">
+                <label className="flex items-center py-2 cursor-pointer">
                   <input
                     type="checkbox"
                     name="disponible"
                     checked={formData.disponible}
                     onChange={handleInputChange}
-                    className="appearance-none w-5 h-5 border border-gray-400 rounded-full checked:bg-blue-500 checked:border-blue-500 cursor-pointer relative"
+                    className="hidden"
                   />
-                  <span>Disponible para venta</span>
+                  <span
+                    className={`w-5 h-5 border rounded-full flex items-center justify-center transition ${
+                      formData.disponible
+                        ? "bg-blue-500 border-blue-500"
+                        : "border-gray-400 bg-white"
+                    }`}
+                  >
+                    {formData.disponible && (
+                      <span className="text-white text-xs font-bold">
+                        <FaCheck />
+                      </span>
+                    )}
+                  </span>
+                  <span className="pl-2">Disponible para venta</span>
                 </label>
               </div>
-
-              <style jsx>{`
-                input[type="checkbox"]:checked::before {
-                  content: "✔";
-                  position: absolute;
-                  top: 50%;
-                  left: 50%;
-                  transform: translate(-50%, -50%);
-                  font-size: 12px;
-                  color: white;
-                  font-weight: bold;
-                }
-              `}</style>
 
               <button
                 type="submit"

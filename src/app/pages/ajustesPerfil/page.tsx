@@ -6,6 +6,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import SessionWrapper from "../sessionWrapper/page";
 import Navbar from "@/app/components/Navbar";
+import NavbarCliente from "@/app/components/NavbarCliente";
 import Loading from "@/app/components/Loading";
 
 interface FormData {
@@ -18,6 +19,7 @@ interface FormData {
 const AjustesPerfil = () => {
   const { data: session } = useSession();
   const { register, handleSubmit, reset } = useForm<FormData>();
+  const role = session?.user.role;
 
   const handleSignOut = async () => {
     setTimeout(() => {
@@ -56,7 +58,7 @@ const AjustesPerfil = () => {
   }
   return (
     <div className="ml-60 min-h-screen bg-gray-100 flex items-center justify-center">
-      <Navbar />
+      <div>{role === "CLIENTE" ? <NavbarCliente /> : <Navbar />}</div>
       <div className="w-full max-w-2xl mx-auto">
         <div className="bg-white shadow-lg rounded-lg p-12">
           <h1 className="text-2xl font-bold text-center text-gray-700 mb-6">

@@ -1,9 +1,9 @@
-import Login from "@/app/auth/login/page";
+import Landing from "./auth/home/page";
 
 function Home() {
   return (
     <main>
-      <Login></Login>
+      <Landing />
     </main>
   );
 }

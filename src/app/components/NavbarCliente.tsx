@@ -1,40 +1,43 @@
 import React, { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
-import {
-  FaUserCog,
-  FaSignOutAlt,
-  FaUserCircle,
-  FaListAlt,
-  FaShoppingCart,
-} from "react-icons/fa";
-import { IoClose } from "react-icons/io5";
+import { FaUserCircle, FaShoppingCart } from "react-icons/fa";
+import { IoMdPhotos, IoIosLogOut } from "react-icons/io";
+import { IoSettingsOutline } from "react-icons/io5";
 
 const NavbarCliente = () => {
   const { data: session } = useSession();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/auth/login" });
+    await signOut({ callbackUrl: "/auth/home" });
   };
 
   return (
     <div>
       <nav className="fixed top-0 left-0 h-screen w-60 bg-blue-700 text-white flex flex-col z-10">
         <div className="py-6 px-5">
-          <h1 className="text-2xl font-bold tracking-wide">Coleccionista</h1>
+          <h1 className="text-2xl font-bold tracking-wide">
+            Coleccionista CreArte
+          </h1>
         </div>
         <ul className="flex-1 space-y-1">
-          <li className="py-3 px-5 hover:bg-blue-800 cursor-pointer flex items-center space-x-5">
-            <FaListAlt />
-            <Link href="/pages/catalogoEstampas" className="text-sm">
-              Catálogo de Estampas
+          <li className="hover:bg-blue-800 cursor-pointer">
+            <Link
+              href="/pages/catalogoEstampas"
+              className="w-full flex items-center space-x-5 py-3 px-5"
+            >
+              <IoMdPhotos className="text-lg" />
+              <span>Estampas</span>
             </Link>
           </li>
-          <li className="py-3 px-5 hover:bg-blue-800 cursor-pointer flex items-center space-x-5">
-            <FaShoppingCart />
-            <Link href="/pages/carrito" className="text-sm">
-              Carrito de Compras
+          <li className="hover:bg-blue-800 cursor-pointer">
+            <Link
+              href="/pages/carrito"
+              className="w-full flex items-center space-x-5 py-3 px-5"
+            >
+              <FaShoppingCart />
+              <span>Carrito de Compras</span>
             </Link>
           </li>
         </ul>
@@ -55,37 +58,33 @@ const NavbarCliente = () => {
       </nav>
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-10">
-          <div className="bg-white p-10 rounded shadow relative w-80">
-            {/* Botón de cerrar */}
-            <button
-              className="absolute top-3 right-4 text-2xl font-bold text-gray-500"
-              onClick={() => setIsModalOpen(false)}
-            >
-              <IoClose />
-            </button>
-            <h2 className="text-xl font-bold mb-4 text-center">
-              Opciones de Usuario
-            </h2>
-            <ul className="space-y-4">
+        <div
+          className="fixed inset-0 bg-black bg-opacity-20 z-10"
+          onClick={() => setIsModalOpen(false)} // Cierra el modal al hacer clic en cualquier parte
+        >
+          <div
+            className="absolute left-14 bottom-5 bg-white py-2 rounded shadow"
+            onClick={(e) => e.stopPropagation()} // Previene que el clic dentro del modal cierre el modal
+          >
+            <ul>
               {/* Opción de Ajustes de perfil */}
               <li>
                 <Link
                   href="/pages/ajustesPerfil"
-                  className="flex items-center space-x-2 text-blue-600 hover:bg-blue-100 p-2 rounded transition-all duration-300"
+                  className="flex items-center space-x-2 hover:bg-slate-100 p-2 rounded transition-all duration-300 px-5"
                   onClick={() => setIsModalOpen(false)}
                 >
-                  <FaUserCog className="text-xl" />
+                  <IoSettingsOutline className="text-xl" />
                   <span>Ajustes de Perfil</span>
                 </Link>
               </li>
               {/* Opción de Cerrar sesión */}
               <li>
                 <button
-                  className="flex items-center space-x-2 text-red-600 hover:bg-red-100 p-2 rounded transition-all duration-300 w-full"
+                  className="flex items-center space-x-2 hover:bg-slate-100 p-2 rounded transition-all duration-300 w-full px-5"
                   onClick={handleSignOut}
                 >
-                  <FaSignOutAlt className="text-xl" />
+                  <IoIosLogOut className="text-xl" />
                   <span>Cerrar Sesión</span>
                 </button>
               </li>

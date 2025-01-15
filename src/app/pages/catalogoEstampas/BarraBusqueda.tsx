@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { FaSearch } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 import { RiEmotionSadLine } from "react-icons/ri";
+import { FaStar } from "react-icons/fa";
 
 function BusquedaEstampas() {
   const [busqueda, setBusqueda] = useState("");
@@ -37,7 +38,11 @@ function BusquedaEstampas() {
     const params = new URLSearchParams();
     if (busqueda) params.append("busqueda", busqueda);
     if (artistaSeleccionado) params.append("artistaId", artistaSeleccionado);
-    if (temaSeleccionado) params.append("tema", temaSeleccionado);
+    if (temaSeleccionado === "mejorValorada") {
+      params.append("mejorValorada", "true");
+    } else if (temaSeleccionado) {
+      params.append("tema", temaSeleccionado);
+    }
 
     fetch(`/api/estampas?${params.toString()}`)
       .then((res) => res.json())
@@ -107,6 +112,21 @@ function BusquedaEstampas() {
           Todas
         </button>
 
+        <button
+          className={`px-4 py-2 rounded-lg ${
+            temaSeleccionado === "mejorValorada"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200"
+          }`}
+          onClick={() => {
+            setBusqueda("");
+            setArtistaSeleccionado("");
+            setTemaSeleccionado("mejorValorada");
+          }}
+        >
+          Mejor valorada
+        </button>
+
         <select
           className="px-4 py-2 border rounded-lg shadow-sm"
           value={artistaSeleccionado}
@@ -160,12 +180,15 @@ function BusquedaEstampas() {
                 alt={estampa.nombre}
                 className="w-full h-48 object-cover rounded-lg mb-4"
               />
-              <h3
-                className="text-lg font-bold h-7
-              mb-2 overflow-hidden"
-              >
-                {estampa.nombre}
-              </h3>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-bold h-7 overflow-hidden">
+                  {estampa.nombre}
+                </h3>
+                <div className="text-sm flex items-center space-x-1 text-stone-600">
+                  <FaStar />
+                  <span>{estampa.rating.toFixed(1)}</span>
+                </div>
+              </div>
               <p className="text-sm h-10 overflow-hidden ">
                 {estampa.descripcion}
               </p>

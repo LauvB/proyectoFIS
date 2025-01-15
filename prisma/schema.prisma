@@ -36,6 +36,7 @@ model Cliente {
   compras        Compra[]
   estadisticas   Estadisticas? @relation("ClienteEstadisticas", fields: [estadisticasId], references: [id])
   estadisticasId Int?
+  ratings        Rating[]
 }
 
 model Estampa {
@@ -52,6 +53,8 @@ model Estampa {
   camisetas           Camiseta[]
   estampasMasVendidas Estadisticas[]     @relation("EstampasVendidas")
   estampasCatalogo    CatalogoEstampas[] @relation("EstampasCatalogo")
+  ratings             Rating[]
+  totalRatings        Int                @default(0)
 }
 
 model Imagen {
@@ -59,6 +62,16 @@ model Imagen {
   url       String
   estampa   Estampa @relation(fields: [estampaId], references: [id])
   estampaId Int
+}
+
+model Rating {
+  id        Int      @id @default(autoincrement())
+  cliente   Cliente  @relation(fields: [clienteId], references: [id])
+  clienteId Int
+  estampa   Estampa  @relation(fields: [estampaId], references: [id])
+  estampaId Int
+  puntaje   Float
+  fecha     DateTime @default(now())
 }
 
 model Camiseta {
@@ -74,8 +87,8 @@ model Camiseta {
   camisetasCatalogo CatalogoCamisetas[] @relation("CamisetasCatalogo")
   cliente           Cliente?            @relation(fields: [clienteId], references: [id])
   clienteId         Int?
-  posicionEstampaX  Float?
-  posicionEstampaY  Float?
+  estado String
+  camisetaImagen String
 }
 
 model Compra {

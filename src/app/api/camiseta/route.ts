@@ -1,90 +1,51 @@
 import { NextResponse } from "next/server";
 import prisma from "@/libs/prisma";
+import * as fs from "fs/promises";
+import * as path from "path";
 
-/**export async function POST(req: Request) {
+const uploadDir = path.join(process.cwd(), "public/products");
+
+async function ensureUploadDir() {
   try {
-    const {
-      modelo,
-      color,
-      talla,
-      material,
-      precio,
-      estampaId,
-      clienteId,
-      posicionEstampaX,
-      posicionEstampaY,
-    } = await req.json();
-
-    if (
-      !modelo ||
-      !color ||
-      !talla ||
-      !material ||
-      !precio ||
-      !estampaId ||
-      !posicionEstampa
-    ) {
-      return NextResponse.json(
-        { message: "Todos los campos requeridos deben completarse" },
-        { status: 400 }
-      );
-    }
-    
-    const newCamiseta = await prisma.camiseta.create({
-      data: {
-        modelo,
-        color,
-        talla,
-        material,
-        precio: parseFloat(precio),
-        estampaId: parseInt(estampaId, 10),
-        clienteId: clienteId ? parseInt(clienteId, 10) : null,
-        posicionEstampaX: posicionEstampaX,
-        posicionEstampaY: posicionEstampaY,
-      },
-    });
-
-    return NextResponse.json(newCamiseta, { status: 201 });
-  } catch (error: any) {
-    console.error("Error al crear la camiseta:", error.message);
-    return NextResponse.json(
-      { message: "Error al crear la camiseta" },
-      { status: 500 }
-    );
+    await fs.access(uploadDir);
+  } catch {
+    await fs.mkdir(uploadDir, { recursive: true });
   }
-}**/
+}
 
 export async function POST(req: Request) {
   try {
-    const {
-      modelo,
-      color,
-      talla,
-      material,
-      precio,
-      estampaId,
-      clienteId,
-      posicionEstampaX,
-      posicionEstampaY,
-    } = await req.json();
+    const formData = await req.formData();
 
-    if (
-      !modelo ||
-      !color ||
-      !talla ||
-      !material ||
-      !precio ||
-      !estampaId ||
-      !posicionEstampaX ||
-      !posicionEstampaY
-    ) {
+    const modelo = formData.get("modelo")?.toString();
+    const color = formData.get("color")?.toString();
+    const talla = formData.get("talla")?.toString();
+    const material = formData.get("material")?.toString();
+    const precio = formData.get("precio")?.toString() || "0";
+    const estampaId = formData.get("estampaId")?.toString() || "0";
+    const clienteId = formData.get("clienteId")?.toString() || "0";
+    const estado = formData.get("estado")?.toString() || "pendiente";
+    const file = formData.get("imagen") as File;
+
+    if (!modelo || !color || !talla || !material || !file) {
       return NextResponse.json(
-        { message: "Todos los campos requeridos deben completarse" },
+        { message: "Campos incompletos" },
         { status: 400 }
       );
     }
 
-    const newCamiseta = await prisma.camiseta.create({
+    await ensureUploadDir();
+
+    const fileName = `${file.name}`;
+    const filePath = path.join(uploadDir, fileName);
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer) as Uint8Array;
+    await fs.writeFile(filePath, buffer);
+
+    const imageUrl = `/products/${fileName}`;
+
+    // Crear la camiseta en la base de datos
+    const nuevaCamiseta = await prisma.camiseta.create({
       data: {
         modelo,
         color,
@@ -92,17 +53,52 @@ export async function POST(req: Request) {
         material,
         precio: parseFloat(precio),
         estampaId: parseInt(estampaId, 10),
-        clienteId: clienteId ? parseInt(clienteId, 10) : null,
-        posicionEstampaX: posicionEstampaX || null, // Asegúrate de manejar valores null
-        posicionEstampaY: posicionEstampaY || null,
+        clienteId: parseInt(clienteId, 10),
+        estado,
+        camisetaImagen: imageUrl,
       },
     });
 
-    return NextResponse.json(newCamiseta, { status: 201 });
+    return NextResponse.json(nuevaCamiseta, { status: 201 });
   } catch (error: any) {
-    console.error("Error al crear la camiseta:", error.message);
+    console.error("Error handling POST request:", error);
     return NextResponse.json(
-      { message: "Error al crear la camiseta" },
+      { message: `Error al agregar la camiseta: ${error.message}` },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(req: Request) {
+  try {
+    // Obtén los parámetros de consulta (si existen)
+    const { searchParams } = new URL(req.url);
+    const clienteId = searchParams.get("clienteId");
+    const modelo = searchParams.get("modelo");
+
+    // Construye los filtros dinámicamente según los parámetros
+    const filters: any = {};
+    if (clienteId) {
+      filters.clienteId = parseInt(clienteId, 10);
+    }
+    if (modelo) {
+      filters.modelo = modelo;
+    }
+
+    // Recupera las camisetas desde la base de datos
+    const camisetas = await prisma.camiseta.findMany({
+      where: filters,
+      include: {
+        estampa: true, // Incluye información relacionada con la estampa si existe
+      },
+    });
+
+    // Retorna las camisetas encontradas
+    return NextResponse.json(camisetas, { status: 200 });
+  } catch (error: any) {
+    console.error("Error handling GET request:", error);
+    return NextResponse.json(
+      { message: `Error al obtener camisetas: ${error.message}` },
       { status: 500 }
     );
   }

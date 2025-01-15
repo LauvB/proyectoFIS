@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/libs/prisma";
-import { promises as fs } from "fs";
-import path from "path";
+import * as fs from "fs/promises";
+import * as path from "path";
 
 const uploadDir = path.join(process.cwd(), "public/uploads");
 
@@ -38,8 +38,9 @@ export async function POST(req: Request) {
     // Guardar la imagen en el servidor
     const fileName = `${Date.now()}_${file.name}`;
     const filePath = path.join(uploadDir, fileName);
-    const fileBuffer = await file.arrayBuffer();
-    await fs.writeFile(filePath, Buffer.from(fileBuffer));
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer) as Uint8Array;
+    await fs.writeFile(filePath, buffer);
 
     const imageUrl = `/uploads/${fileName}`;
 
@@ -77,6 +78,7 @@ export async function GET(req: Request) {
     const tema = url.searchParams.get("tema");
     const rol = url.searchParams.get("rol");
     const busqueda = url.searchParams.get("busqueda");
+    const mejorValorada = url.searchParams.get("mejorValorada") === "true";
 
     let estampas;
 
@@ -142,6 +144,24 @@ export async function GET(req: Request) {
       estampas = await prisma.estampa.findMany({
         where: {
           tema: tema,
+          disponibleParaVenta: true,
+        },
+        include: {
+          imagenes: true,
+          artista: {
+            include: {
+              usuario: true,
+            },
+          },
+        },
+      });
+    } else if (mejorValorada) {
+      // Filtrar por estampas con rating mayor a 4
+      estampas = await prisma.estampa.findMany({
+        where: {
+          rating: {
+            gte: 4,
+          },
           disponibleParaVenta: true,
         },
         include: {
