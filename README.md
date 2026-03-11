@@ -1,4 +1,41 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Custom T-Shirt Marketplace 👕
+
+Web platform where users can browse and purchase custom t-shirts designed by artists.
+
+The application allows artists to upload designs and customers to choose a design and apply it to different t-shirt models.
+
+## 📸 Application Preview
+
+### Landing Page
+
+![Landing Page](./public/landing-inicio.png)
+
+![Landing Page](./public/landing-registro.png)
+
+---
+
+### Design Catalog
+
+Artists can upload their own designs
+
+![Stamp](./public/subirEstampa.png)
+
+---
+
+### Design Catalog
+
+Users can explore available designs created by artists.
+
+![Catalog](./images/catalogo.png)
+
+---
+
+### T-Shirt Customization
+
+Customers can choose a design and apply it to a t-shirt.
+
+![Customization](./public/personalizaCamiseta.png)
 
 ## Getting Started
 
