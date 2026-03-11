@@ -27,7 +27,7 @@ Artists can upload their own designs
 
 Users can explore available designs created by artists.
 
-![Catalog](./images/catalogo.png)
+![Catalog](./public/catalogo.png)
 
 ---
 
